@@ -145,6 +145,43 @@ Prompt wording doesn't reliably override a structural prior. The realistic
 options are reference-image conditioning, a small LoRA trained on a few dozen
 photographs, or shipping savoury dishes first and desserts later.
 
+## A third finding: the prompt was contradicting itself
+
+Reviewing the assembled prompts rather than the images turned up a defect no
+image would have obviously pointed at.
+
+The prompt builder appended each cuisine's "table context" — a vinegar dip,
+banchan, a soju glass — to every generation. Two things went wrong.
+
+**It contradicted itself on the delivery-app preset.** That preset's negative
+prompt says *"scattered props, cutlery"*, because Foodpanda wants a single
+legible dish. Its positive prompt was simultaneously asking for *"assorted
+banchan in small white dishes"*. The model was told opposite things at once, on
+the one preset whose entire job is a clean single subject.
+
+**It put savoury context on desserts.** Table context is defined per cuisine,
+so **halo-halo was being prompted with "a small saucer of spiced vinegar with
+garlic and chili."** On a shaved-ice dessert.
+
+Gating context on the preset and on whether the dish is sweet, then re-rendering
+halo-halo with the same seed:
+
+![halo-halo in a glass with visible layers](images/kakanin-halohalo-after-propfix-rating3.jpg)
+
+Now it is in a glass, visibly layered, with ube on top and a scoop and spoon —
+against the pudding dome from before. Still not shippable: the layers read as
+solid rather than shaved ice, and it is a tumbler rather than a tall footed
+glass. But it shows that part of the "structural prior" problem was really
+prompt noise. The model attends to structure once the contradictions are gone.
+
+A smaller thing fell out of it worth repeating. Writing a test to enforce "no
+savoury context on sweet dishes" required deciding which categories are sweet,
+and the first version failed — correctly — by refusing to give a beef empanada
+its vinegar dip. Empanada was filed under *merienda*, which is a **meal
+occasion**, not a flavour: it holds savoury empanada and sweet turon alike. The
+test was wrong, not the data. Taxonomies that mix "when you eat it" with "what
+it is" will do that to you.
+
 ## Timings, since that was the original question
 
 | Operation | Seconds |
